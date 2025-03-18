@@ -18,10 +18,14 @@ pipeline {
             }
             post {
                 always {
-                    mail to: "${EMAIL_RECIPIENT}",
-                         subject: "Test Stage Result",
-                         body: "Tests completed: ${currentBuild.currentResult}",
-                         attachLog: true
+                    script {
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        emailext(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Test Stage Result - ${currentBuild.fullDisplayName}",
+                            body: "Tests completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                        )
+                    }
                 }
             }
         }
@@ -40,10 +44,14 @@ pipeline {
             }
             post {
                 always {
-                    mail to: "${EMAIL_RECIPIENT}",
-                         subject: "Security Scan Result",
-                         body: "Security scan completed: ${currentBuild.currentResult}",
-                         attachLog: true
+                    script {
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        emailext(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
+                            body: "Security scan completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                        )
+                    }
                 }
             }
         }
