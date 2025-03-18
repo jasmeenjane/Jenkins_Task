@@ -1,0 +1,26 @@
+
+#container {
+    background-color: blanchedalmond; 
+    padding: 20px; 
+    text-align: center;
+}
+
+
+h1 {
+    color: #333; 
+    font-size: 2em; 
+}
+
+button {
+    background-color: #007BFF; 
+    color: white; 
+   
+    border-radius: 5px; 
+    padding: 10px 20px; 
+    cursor: pointer;
+}
+
+/* Button hover effect */
+button:hover {
+    background-color: #0056b3; 
+}
