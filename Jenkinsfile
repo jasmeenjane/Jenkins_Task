@@ -1,80 +1,61 @@
 pipeline {
     agent any
     environment {
-        EMAIL_RECIPIENT = "jasmeen4783.be23@chitkara.edu.in"
+        STAGING_SERVER = 'staging.example.com'
+        PROD_SERVER = 'prod.example.com'
+        EMAIL = 'priyanka4800.be23@chitkara.edu.in'
     }
     stages {
         stage('Build') {
             steps {
-                echo 'Building the application...'
-                bat 'npm install'  // Installs dependencies
+                echo 'Building the project...'
+                sh 'npm install'
+                echo 'smth'
             }
         }
-
         stage('Unit and Integration Tests') {
             steps {
-                echo 'Running unit and integration tests...'
-                bat 'npm test'  // Runs your test scripts
-            }
-            post {
-                always {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        emailext(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Test Stage Result - ${currentBuild.fullDisplayName}",
-                            body: "Tests completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
-                }
+                echo 'Running unit tests...'
+                sh 'npm test || exit 1'
             }
         }
-
-        stage('Code Analysis') {
+         stage('Code Analysis') {
             steps {
-                echo 'Analyzing code...'
-                bat 'npm run lint'  // Example: Assuming ESLint is configured
+                echo 'Performing code analysis...'
+                sh 'npm run lint || exit 1' 
             }
         }
-
         stage('Security Scan') {
             steps {
-                echo 'Performing security scan...'
-                bat 'trivy fs .'  // Trivy can still be used if scanning the filesystem
-            }
-            post {
-                always {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        emailext(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
-                            body: "Security scan completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
-                }
+                echo 'Running SonarQube Security Scan...'
+                
             }
         }
 
         stage('Deploy to Staging') {
             steps {
-                echo 'Deploying to Staging Server...'
-                bat 'scp -r . user@staging-server:/deploy/'  // Modify according to your deploy structure
+                echo 'Deploying to Staging...'
             }
         }
-
         stage('Integration Tests on Staging') {
             steps {
-                echo 'Running integration tests on Staging...'
-                bat 'curl -X GET http://staging-server/health-check'
-            }
+                echo 'Running integration tests on staging...'
+                }
         }
-
         stage('Deploy to Production') {
             steps {
-                echo 'Deploying to Production Server...'
-                bat 'scp -r . user@production-server:/deploy/'  // Modify as needed
+                echo 'Deploying to Production...'
+                
             }
+        }
+    }
+    post {
+        always {
+            emailext (
+                subject: "Jenkins Pipeline Execution",
+                body: "Pipeline execution complete. Check Jenkins for details.",
+                to: "$EMAIL"
+            )
         }
     }
 }
