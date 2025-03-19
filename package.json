@@ -4,7 +4,7 @@
   "description": "New feature",
   "main": "script.js",
   "scripts": {
-  "test": "jest --passWithNoTests"
+  "test": "jest "
 },
 
   "keywords": [],
