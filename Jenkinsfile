@@ -7,14 +7,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the application...'
-                bat 'mvn clean package'  // Example for Java using Maven
+                bat 'npm install'  // Installs dependencies
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running unit and integration tests...'
-                bat 'mvn test'  // Example for Java
+                bat 'npm test'  // Runs your test scripts
             }
             post {
                 always {
@@ -33,14 +33,14 @@ pipeline {
         stage('Code Analysis') {
             steps {
                 echo 'Analyzing code...'
-                bat 'sonar-scanner'  // Example using SonarQube
+                bat 'npm run lint'  // Example: Assuming ESLint is configured
             }
         }
 
         stage('Security Scan') {
             steps {
                 echo 'Performing security scan...'
-                bat 'trivy fs .'  // Example using Trivy for security scanning
+                bat 'trivy fs .'  // Trivy can still be used if scanning the filesystem
             }
             post {
                 always {
@@ -59,21 +59,21 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 echo 'Deploying to Staging Server...'
-                bat 'scp target/app.jar user@staging-server:/deploy/'  // Example
+                bat 'scp -r . user@staging-server:/deploy/'  // Modify according to your deploy structure
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
                 echo 'Running integration tests on Staging...'
-                bat 'curl -X GET http://staging-server/health-check'  // Example
+                bat 'curl -X GET http://staging-server/health-check'
             }
         }
 
         stage('Deploy to Production') {
             steps {
                 echo 'Deploying to Production Server...'
-                bat 'scp target/app.jar user@production-server:/deploy/'  // Example
+                bat 'scp -r . user@production-server:/deploy/'  // Modify as needed
             }
         }
     }
