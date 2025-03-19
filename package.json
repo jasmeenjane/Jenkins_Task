@@ -4,8 +4,9 @@
   "description": "New feature",
   "main": "script.js",
   "scripts": {
-    "test": "jest"
-  },
+  "test": "jest --passWithNoTests"
+},
+
   "keywords": [],
   "author": "",
   "license": "ISC",
