@@ -35,13 +35,15 @@ pipeline {
                 echo 'Using npm audit for security scanning: npm audit' // Runs NPM Audit for security scanning
             }
             post {
-                script {
-                    def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                    emailext(
-                        to: "${EMAIL_RECIPIENT}",
-                        subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
-                        body: "Security scan completed: ${currentBuild.currentResult}\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
-                    )
+                always {
+                    script {
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        emailext(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
+                            body: "Security scan completed: ${currentBuild.currentResult}\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
+                        )
+                    }
                 }
                 failure {
                     script {
