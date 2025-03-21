@@ -49,7 +49,7 @@ pipeline {
                         - No critical vulnerabilities were found.
                         Please check the Jenkins build logs for more details: ${env.BUILD_URL}
                         """,
-                        attachmentsPattern: 'security-scan-results.log'  // Attach security scan logs
+                        attachLog: true  // Attach security scan logs
                     )
                 }
                 failure {
@@ -63,7 +63,7 @@ pipeline {
                         - Critical vulnerabilities were found. Please address them.
                         Check the Jenkins build logs for more details: ${env.BUILD_URL}
                         """,
-                        attachmentsPattern: 'security-scan-results.log'  // Attach security scan logs
+                        attachLog: true  // Attach security scan logs
                     )
                 }
             }
@@ -103,7 +103,7 @@ pipeline {
                         - Deployment was performed using npm.
                         Please check the Jenkins build logs for more details: ${env.BUILD_URL}
                         """,
-                       attachmentsPattern: 'deploy-production-logs.log'  // Attach deployment logs
+                       attachLog: true  // Attach deployment logs
                     )
                 }
                 failure {
@@ -117,7 +117,7 @@ pipeline {
                         - Deployment was performed using npm.
                         Check the Jenkins build logs for more details: ${env.BUILD_URL}
                         """,
-                        attachmentsPattern: 'deploy-production-logs.log'  // Attach deployment logs
+                        attachLog: true  // Attach deployment logs
                     )
                 }
             }
@@ -134,7 +134,7 @@ pipeline {
                 - All stages completed without errors.
                 - Check the Jenkins build logs for more details: ${env.BUILD_URL}
                 """,
-                attachmentsPattern: 'pipeline-logs.log'  // Attach pipeline logs
+                attachLog: true  // Attach pipeline logs
             )
         }
     }
