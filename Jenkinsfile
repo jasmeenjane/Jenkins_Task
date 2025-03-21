@@ -1,4 +1,5 @@
-pipeline {
+pipeline 
+{
     agent any
     environment {
         EMAIL_RECIPIENT = "jasmeen4783.be23@chitkara.edu.in"
@@ -31,41 +32,41 @@ pipeline {
             }
         }
 
-        stage('Security Scan') {
-            steps {
+        stage('Security Scan') 
+        {
+            steps 
+            {
                 echo 'Performing security scan...'
                 echo 'Using npm audit for security scanning: npm audit' // Runs NPM Audit for security scanning
                 
             }
-            post {
-                success {
-                    mail(
+            post 
+            {
+                script 
+                {
+                    def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                    emailext
+                    (
                         to: "${EMAIL_RECIPIENT}",
-                        subject: "Security Scan - Success",
-                        body: """
-                        The Security Scan stage has completed successfully.
-                        Details:
-                        - Security scan was performed using NPM Audit.
-                        - No critical vulnerabilities were found.
-                        Please check the Jenkins build logs for more details: ${env.BUILD_URL}
-                        """,
-                    )
+                        subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
+                        body: "Security scan completed: ${currentBuild.currentResult}\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
+                    ) 
                 }
-                failure {
-                    mail(
-                        to: "${EMAIL_RECIPIENT}",
-                        subject: "Security Scan - Failed",
-                        body: """
-                        The Security Scan stage has failed.
-                        Details:
-                        - Security scan was performed using NPM Audit.
-                        - Critical vulnerabilities were found. Please address them.
-                        Check the Jenkins build logs for more details: ${env.BUILD_URL}
-                        """,
-                    )
+                failure 
+                {
+                    script 
+                    {
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        emailext(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Build Failed - ${currentBuild.fullDisplayName}",
+                            body: "Build failed: ${currentBuild.currentResult}\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"  
+                        )
+                    }
                 }
             }
         }
+
 
         stage('Deploy to Staging') {
             steps {
@@ -89,49 +90,44 @@ pipeline {
                 echo 'Using npm to deploy to production: npm run deploy:production' // Deploys to production server
               
             }
-            post {
+             post {
                 success {
-                    mail(
-                        to: "${EMAIL_RECIPIENT}",
-                        subject: "Deploy to Production - Success",
-                        body: """
-                        The Deploy to Production stage has completed successfully.
-                        Details:
-                        - Application was deployed to the production server.
-                        - Deployment was performed using npm.
-                        Please check the Jenkins build logs for more details: ${env.BUILD_URL}
-                        """,
-                    )
+                    script {
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        emailext(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Deploy to Production Result - ${currentBuild.fullDisplayName}",
+                            body: "Deploy to Production completed: ${currentBuild.currentResult}\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
+                        )
+                    }
                 }
                 failure {
-                   mail(
-                        to: "${EMAIL_RECIPIENT}",
-                        subject: "Deploy to Production - Failed",
-                        body: """
-                        The Deploy to Production stage has failed.
-                        Details:
-                        - Application deployment to the production server failed.
-                        - Deployment was performed using npm.
-                        Check the Jenkins build logs for more details: ${env.BUILD_URL}
-                        """
-                    )
+                    script {
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        emailext(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Deploy to Production Failed - ${currentBuild.fullDisplayName}",
+                            body: "Deploy to Production failed: ${currentBuild.currentResult}\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
+                        )
+                    }
                 }
             }
         }
-    }
-    post {
-        success {
-            mail(
-                to: "${EMAIL_RECIPIENT}",
-                subject: "Jenkins Pipeline Execution - Success",
-                body: """
-                The Pipeline execution completed successfully.
-                Details:
-                - All stages completed without errors.
-                - Check the Jenkins build logs for more details: ${env.BUILD_URL}
-                """
-                
-            )
+    post 
+    {
+        success 
+        {
+            script 
+            {
+                def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                emailext
+                (
+                    to: "${EMAIL_RECIPIENT}",
+                    subject: "Jenkins Pipeline Execution - Success",
+                    body: "Pipeline execution completed successfully.\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
+                )
+            }
         }
     }
+}
 }
