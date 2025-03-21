@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "script.js",
   "scripts": {
-    "test": "echo 'Running tests...' && exit 0",
+    "test": "jest",
     "start": "echo 'Starting the application...' && exit 0"
   },
   "keywords": [],
@@ -199,5 +199,7 @@
     "yargs-parser": "^21.1.1",
     "yocto-queue": "^0.1.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "jest-environment-jsdom": "^29.7.0"
+  }
 }
