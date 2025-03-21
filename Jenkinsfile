@@ -38,20 +38,20 @@ pipeline {
                 always {
                     script {
                         def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        emailext(
+                        mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
-                            body: "Security scan completed: ${currentBuild.currentResult}\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
+                            body: "Security scan completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                         )
                     }
                 }
                 failure {
                     script {
                         def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        emailext(
+                        mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Build Failed - ${currentBuild.fullDisplayName}",
-                            body: "Build failed: ${currentBuild.currentResult}\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
+                            body: "Build failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                         )
                     }
                 }
@@ -81,20 +81,20 @@ pipeline {
                 success {
                     script {
                         def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        emailext(
+                        mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Deploy to Production Result - ${currentBuild.fullDisplayName}",
-                            body: "Deploy to Production completed: ${currentBuild.currentResult}\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
+                            body: "Deploy to Production completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                         )
                     }
                 }
                 failure {
                     script {
                         def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        emailext(
+                        mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Deploy to Production Failed - ${currentBuild.fullDisplayName}",
-                            body: "Deploy to Production failed: ${currentBuild.currentResult}\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
+                            body: "Deploy to Production failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                         )
                     }
                 }
@@ -105,10 +105,10 @@ pipeline {
         success {
             script {
                 def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                emailext(
+                mail(
                     to: "${EMAIL_RECIPIENT}",
                     subject: "Jenkins Pipeline Execution - Success",
-                    body: "Pipeline execution completed successfully.\n\nPlease check the Jenkins build logs for more details: Logs:\n${logContent}"
+                    body: "Pipeline execution completed successfully.\n\nLogs:\n${logContent}"
                 )
             }
         }
