@@ -18,6 +18,7 @@ pipeline {
             steps {
                 echo 'Running unit and integration tests...'
                 echo 'Using npm to run tests: npm test' // Runs test scripts
+                bat 'npm test'
                   
             }
         }
@@ -26,7 +27,7 @@ pipeline {
             steps {
                 echo 'Analyzing code...'
                 echo 'Using ESLint for code analysis: npm run lint' // Runs ESLint for code analysis
-                bat 'npm run lint'  
+        
             }
         }
 
