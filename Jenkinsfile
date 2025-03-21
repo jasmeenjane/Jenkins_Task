@@ -39,7 +39,7 @@ pipeline {
             }
             post {
                 success {
-                    emailext (
+                    mail(
                         to: "${EMAIL_RECIPIENT}",
                         subject: "Security Scan - Success",
                         body: """
@@ -53,7 +53,7 @@ pipeline {
                     )
                 }
                 failure {
-                    emailext(
+                    mail(
                         to: "${EMAIL_RECIPIENT}",
                         subject: "Security Scan - Failed",
                         body: """
@@ -93,7 +93,7 @@ pipeline {
             }
             post {
                 success {
-                    emailext(
+                    mail(
                         to: "${EMAIL_RECIPIENT}",
                         subject: "Deploy to Production - Success",
                         body: """
@@ -107,7 +107,7 @@ pipeline {
                     )
                 }
                 failure {
-                    emailext(
+                   mail(
                         to: "${EMAIL_RECIPIENT}",
                         subject: "Deploy to Production - Failed",
                         body: """
@@ -125,7 +125,7 @@ pipeline {
     }
     post {
         success {
-            emailext(
+            mail(
                 to: "${EMAIL_RECIPIENT}",
                 subject: "Jenkins Pipeline Execution - Success",
                 body: """
