@@ -20,7 +20,7 @@ pipeline {
                 always {
                     script {
                         def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        emailext(
+                        mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Test Stage Result - ${currentBuild.fullDisplayName}",
                             body: "Tests completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
@@ -45,7 +45,7 @@ pipeline {
                 always {
                     script {
                         def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        emailext(
+                        main(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
                             body: "Security scan completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
