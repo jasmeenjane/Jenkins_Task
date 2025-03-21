@@ -17,8 +17,8 @@ pipeline {
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running unit and integration tests...'
-                echo 'Using npm to run tests: npm test'
-                bat 'npm test'  // Runs your test scripts
+                echo 'Using npm to run tests: npm test' // Runs test scripts
+                  
             }
         }
 
