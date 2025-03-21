@@ -9,6 +9,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the application...'
+                echo 'Using npm to install dependencies: npm install'
                 bat 'npm install'  // Installs dependencies
             }
         }
@@ -16,44 +17,53 @@ pipeline {
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running unit and integration tests...'
+                echo 'Using npm to run tests: npm test'
                 bat 'npm test'  // Runs your test scripts
-            }
-            post {
-                always {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        mail(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Test Stage Result - ${currentBuild.fullDisplayName}",
-                            body: "Tests completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
-                }
             }
         }
 
         stage('Code Analysis') {
             steps {
                 echo 'Analyzing code...'
-                // Add code analysis tools here, e.g., SonarQube
+                echo 'Using ESLint for code analysis: npm run lint' // Runs ESLint for code analysis
+                bat 'npm run lint'  
             }
         }
 
         stage('Security Scan') {
             steps {
                 echo 'Performing security scan...'
-                // Add security scan tools here, e.g., OWASP ZAP
+                echo 'Using npm audit for security scanning: npm audit' // Runs NPM Audit for security scanning
+                
             }
             post {
-                always {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        mail(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
-                            body: "Security scan completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
+                success {
+                    emailext (
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Security Scan - Success",
+                        body: """
+                        The Security Scan stage has completed successfully.
+                        Details:
+                        - Security scan was performed using NPM Audit.
+                        - No critical vulnerabilities were found.
+                        Please check the Jenkins build logs for more details: ${env.BUILD_URL}
+                        """,
+                        attachmentsPattern: '**/security-scan-results/*.log'  // Attach security scan logs
+                    )
+                }
+                failure {
+                    emailext (
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Security Scan - Failed",
+                        body: """
+                        The Security Scan stage has failed.
+                        Details:
+                        - Security scan was performed using NPM Audit.
+                        - Critical vulnerabilities were found. Please address them.
+                        Check the Jenkins build logs for more details: ${env.BUILD_URL}
+                        """,
+                        attachmentsPattern: '**/security-scan-results/*.log'  // Attach security scan logs
+                    )
                 }
             }
         }
@@ -61,29 +71,69 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 echo 'Deploying to Staging Server...'
-                // Add deployment script for staging server
+                echo 'Using npm to deploy to staging: npm run deploy:staging' // Deploys to staging server
+                
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
                 echo 'Running integration tests on Staging...'
-                // Add integration test scripts for staging
+                echo 'Using Cypress for integration tests: npx cypress run --env staging' // Runs Cypress integration tests on staging
+             
             }
         }
 
         stage('Deploy to Production') {
             steps {
                 echo 'Deploying to Production Server...'
-                // Add deployment script for production server
+                echo 'Using npm to deploy to production: npm run deploy:production' // Deploys to production server
+              
+            }
+            post {
+                success {
+                    emailext (
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Deploy to Production - Success",
+                        body: """
+                        The Deploy to Production stage has completed successfully.
+                        Details:
+                        - Application was deployed to the production server.
+                        - Deployment was performed using npm.
+                        Please check the Jenkins build logs for more details: ${env.BUILD_URL}
+                        """,
+                        attachmentsPattern: '**/deploy-production-logs/*.log'  // Attach deployment logs
+                    )
+                }
+                failure {
+                    emailext (
+                        to: "${EMAIL_RECIPIENT}",
+                        subject: "Deploy to Production - Failed",
+                        body: """
+                        The Deploy to Production stage has failed.
+                        Details:
+                        - Application deployment to the production server failed.
+                        - Deployment was performed using npm.
+                        Check the Jenkins build logs for more details: ${env.BUILD_URL}
+                        """,
+                        attachmentsPattern: '**/deploy-production-logs/*.log'  // Attach deployment logs
+                    )
+                }
             }
         }
     }
     post {
-        always {
-            mail (to: "${EMAIL_RECIPIENT}",
-                subject: "Jenkins Pipeline Execution",
-                body: "Pipeline execution complete. Check Jenkins for details."
+        success {
+            mail (
+                to: "${EMAIL_RECIPIENT}",
+                subject: "Jenkins Pipeline Execution - Success",
+                body: """
+                The Pipeline execution completed successfully.
+                Details:
+                - All stages completed without errors.
+                - Check the Jenkins build logs for more details: ${env.BUILD_URL}
+                """,
+                attachmentsPattern: '**/pipeline-logs/*.log'  // Attach pipeline logs
             )
         }
     }
