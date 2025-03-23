@@ -21,6 +21,29 @@ pipeline {
                 bat 'npm test'
             }
         }
+        post 
+        {
+            success {
+                    script {
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        mail(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Unit and Integration Tests Result - ${currentBuild.fullDisplayName}",
+                            body: "Unit and Integration Tests completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                        )
+                    }
+                }
+                failure {
+                    script {
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        mail(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Deploy to Production Failed - ${currentBuild.fullDisplayName}",
+                            body: "Deploy to Production failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                        )
+                    }
+                }
+            }
 
         stage('Code Analysis') {
             steps {
@@ -77,28 +100,7 @@ pipeline {
                 echo 'Deploying to Production Server...'
                 echo 'Using npm to deploy to production: npm run deploy:production' // Deploys to production server
             }
-            post {
-                success {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        mail(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Deploy to Production Result - ${currentBuild.fullDisplayName}",
-                            body: "Deploy to Production completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
-                }
-                failure {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        mail(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Deploy to Production Failed - ${currentBuild.fullDisplayName}",
-                            body: "Deploy to Production failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
-                }
-            }
+            
         }
     }
     post {
