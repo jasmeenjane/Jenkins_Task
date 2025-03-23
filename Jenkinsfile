@@ -20,10 +20,8 @@ pipeline {
                 echo 'Using npm to run tests: npm test' // Runs test scripts
                 bat 'npm test'
             }
-        }
-        post 
-        {
-            success {
+            post {
+                success {
                     script {
                         def logContent = currentBuild.rawBuild.getLog(100).join("\n")
                         mail(
@@ -44,6 +42,7 @@ pipeline {
                     }
                 }
             }
+        }
 
         stage('Code Analysis') {
             steps {
@@ -100,7 +99,6 @@ pipeline {
                 echo 'Deploying to Production Server...'
                 echo 'Using npm to deploy to production: npm run deploy:production' // Deploys to production server
             }
-            
         }
     }
     post {
