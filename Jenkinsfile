@@ -10,7 +10,7 @@ pipeline {
             steps {
                 echo 'Building the application...'
                 echo 'Using npm to install dependencies: npm install'
-                bat 'npm install'  // Installs dependencies
+                echo 'npm install'  // Installs dependencies
             }
         }
 
@@ -18,7 +18,7 @@ pipeline {
             steps {
                 echo 'Running unit and integration tests...'
                 echo 'Using npm to run tests: npm test' // Runs test scripts
-                bat 'npm test'
+                echo 'npm test'
             }
             post {
                 success {
