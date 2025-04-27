@@ -1,116 +1,78 @@
 pipeline {
     agent any
+
     environment {
-        EMAIL_RECIPIENT = "jasmeen4783.be23@chitkara.edu.in"
-        STAGING_SERVER = 'staging.example.com'
-        PROD_SERVER = 'prod.example.com'
+        STAGING_SERVER = 'staging.netlify.com'
+        PROD_SERVER = 'prod.netilify.com'
+        EMAIL = 'jasmeen4783.be23@chitkara.edu.in'
     }
+
     stages {
         stage('Build') {
             steps {
-                echo 'Building the application...'
-                echo 'Using npm to install dependencies: npm install'
-                bat 'npm install'  // Installs dependencies
+                echo 'Starting the build process...'
+                echo 'Using Node.js and npm for dependency management.'
+                echo 'New changes'
+                bat 'npm install'
+                echo 'Build completed successfully.'
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
-                echo 'Running unit and integration tests...'
-                echo 'Using npm to run tests: npm test' // Runs test scripts
+                echo 'Executing unit tests using Jest/Mocha...'
                 bat 'npm test'
-            }
-            post {
-                success {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        mail(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Unit and Integration Tests Result - ${currentBuild.fullDisplayName}",
-                            body: "Unit and Integration Tests completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
-                }
-                failure {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        mail(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Deploy to Production Failed - ${currentBuild.fullDisplayName}",
-                            body: "Deploy to Production failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
-                }
             }
         }
 
         stage('Code Analysis') {
             steps {
-                echo 'Analyzing code...'
+                echo 'Running static code analysis using ESLint...'
                 echo 'Using ESLint for code analysis: npm run lint' // Runs ESLint for code analysis
+
             }
         }
 
         stage('Security Scan') {
             steps {
-                echo 'Performing security scan...'
-                echo 'Using npm audit for security scanning: npm audit' // Runs NPM Audit for security scanning
-            }
-            post {
-                always {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        mail(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
-                            body: "Security scan completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
-                }
-                failure {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        mail(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Build Failed - ${currentBuild.fullDisplayName}",
-                            body: "Build failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
-                }
+                echo 'Performing security scan using SonarQube...'
+                echo 'It is used to scan the project'
             }
         }
 
         stage('Deploy to Staging') {
             steps {
-                echo 'Deploying to Staging Server...'
-                echo 'Using npm to deploy to staging: npm run deploy:staging' // Deploys to staging server
+                echo 'Deploying to Staging Server: $STAGING_SERVER'
+                echo 'Tools like Netlify and AWS can be used to deploy the project'
+                echo 'npx netlify-cli deploy --site your-staging-site-id --prod'
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
-                echo 'Running integration tests on Staging...'
-                echo 'Using Cypress for integration tests: npx cypress run --env staging' // Runs Cypress integration tests on staging
+                echo 'Running end-to-end tests using Cypress on Staging...'
+                echo 'cypress will be used forthis project as it deals with node.js'
+                echo 'npx cypress run'
             }
         }
 
         stage('Deploy to Production') {
             steps {
-                echo 'Deploying to Production Server...'
-                echo 'Using npm to deploy to production: npm run deploy:production' // Deploys to production server
+                echo 'Deploying to Production Server: $PROD_SERVER'
+                echo 'Netlify and AWS can be used for this as well'
+                echo 'npx netlify-cli deploy --site your-production-site-id --prod'
             }
         }
     }
+
     post {
-        success {
-            script {
-                def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                mail(
-                    to: "${EMAIL_RECIPIENT}",
-                    subject: "Jenkins Pipeline Execution - Success",
-                    body: "Pipeline execution completed successfully.\n\nLogs:\n${logContent}"
-                )
-            }
+        always {
+            echo 'Sending email notification to $EMAIL'
+            mail(
+                subject: "Jenkins Pipeline Execution",
+                body: "Pipeline execution complete. Check Jenkins for details...",
+                to: "$EMAIL"
+            )
         }
     }
 }
