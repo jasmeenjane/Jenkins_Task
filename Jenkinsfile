@@ -127,17 +127,15 @@ pipeline {
     }
 }
 
-// Helper function to get log content in a version-compatible way
+
 def getLogContent() {
     try {
-        // Try the modern approach first
         return currentBuild.getLog()
     } catch (Exception e) {
         try {
-            // Fallback to rawBuild if available
             return currentBuild.rawBuild.getLog(100).join("\n")
         } catch (Exception e2) {
-            // Final fallback - return basic info if log access fails
+            
             return "Unable to retrieve full logs. Build result: ${currentBuild.currentResult}"
         }
     }
