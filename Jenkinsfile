@@ -23,7 +23,7 @@ pipeline {
             post {
                 success {
                     script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        def logContent = currentBuild.log.join("\n")
                         mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Unit and Integration Tests Result - ${currentBuild.fullDisplayName}",
@@ -33,11 +33,11 @@ pipeline {
                 }
                 failure {
                     script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        def logContent = currentBuild.log.join("\n")
                         mail(
                             to: "${EMAIL_RECIPIENT}",
-                            subject: "Deploy to Production Failed - ${currentBuild.fullDisplayName}",
-                            body: "Deploy to Production failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                            subject: "Unit Tests Failed - ${currentBuild.fullDisplayName}",
+                            body: "Unit and Integration Tests failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                         )
                     }
                 }
@@ -59,21 +59,11 @@ pipeline {
             post {
                 always {
                     script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        def logContent = currentBuild.log.join("\n")
                         mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
                             body: "Security scan completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
-                        )
-                    }
-                }
-                failure {
-                    script {
-                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
-                        mail(
-                            to: "${EMAIL_RECIPIENT}",
-                            subject: "Build Failed - ${currentBuild.fullDisplayName}",
-                            body: "Build failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                         )
                     }
                 }
@@ -99,16 +89,38 @@ pipeline {
                 echo 'Deploying to Production Server...'
                 echo 'Using npm to deploy to production: npm run deploy:production' // Deploys to production server
             }
+            post {
+                failure {
+                    script {
+                        def logContent = currentBuild.log.join("\n")
+                        mail(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Deploy to Production Failed - ${currentBuild.fullDisplayName}",
+                            body: "Deploy to Production failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                        )
+                    }
+                }
+            }
         }
     }
     post {
         success {
             script {
-                def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                def logContent = currentBuild.log.join("\n")
                 mail(
                     to: "${EMAIL_RECIPIENT}",
                     subject: "Jenkins Pipeline Execution - Success",
                     body: "Pipeline execution completed successfully.\n\nLogs:\n${logContent}"
+                )
+            }
+        }
+        failure {
+            script {
+                def logContent = currentBuild.log.join("\n")
+                mail(
+                    to: "${EMAIL_RECIPIENT}",
+                    subject: "Jenkins Pipeline Failed - ${currentBuild.fullDisplayName}",
+                    body: "Pipeline execution failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                 )
             }
         }
