@@ -23,7 +23,7 @@ pipeline {
             post {
                 success {
                     script {
-                        def logContent = currentBuild.log.join("\n")
+                        def logContent = getLogContent()
                         mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Unit and Integration Tests Result - ${currentBuild.fullDisplayName}",
@@ -33,7 +33,7 @@ pipeline {
                 }
                 failure {
                     script {
-                        def logContent = currentBuild.log.join("\n")
+                        def logContent = getLogContent()
                         mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Unit Tests Failed - ${currentBuild.fullDisplayName}",
@@ -59,7 +59,7 @@ pipeline {
             post {
                 always {
                     script {
-                        def logContent = currentBuild.log.join("\n")
+                        def logContent = getLogContent()
                         mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
@@ -92,7 +92,7 @@ pipeline {
             post {
                 failure {
                     script {
-                        def logContent = currentBuild.log.join("\n")
+                        def logContent = getLogContent()
                         mail(
                             to: "${EMAIL_RECIPIENT}",
                             subject: "Deploy to Production Failed - ${currentBuild.fullDisplayName}",
@@ -106,7 +106,7 @@ pipeline {
     post {
         success {
             script {
-                def logContent = currentBuild.log.join("\n")
+                def logContent = getLogContent()
                 mail(
                     to: "${EMAIL_RECIPIENT}",
                     subject: "Jenkins Pipeline Execution - Success",
@@ -116,13 +116,29 @@ pipeline {
         }
         failure {
             script {
-                def logContent = currentBuild.log.join("\n")
+                def logContent = getLogContent()
                 mail(
                     to: "${EMAIL_RECIPIENT}",
                     subject: "Jenkins Pipeline Failed - ${currentBuild.fullDisplayName}",
                     body: "Pipeline execution failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                 )
             }
+        }
+    }
+}
+
+// Helper function to get log content in a version-compatible way
+def getLogContent() {
+    try {
+        // Try the modern approach first
+        return currentBuild.getLog()
+    } catch (Exception e) {
+        try {
+            // Fallback to rawBuild if available
+            return currentBuild.rawBuild.getLog(100).join("\n")
+        } catch (Exception e2) {
+            // Final fallback - return basic info if log access fails
+            return "Unable to retrieve full logs. Build result: ${currentBuild.currentResult}"
         }
     }
 }
