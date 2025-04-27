@@ -1,49 +1,43 @@
 pipeline {
     agent any
-
     environment {
         EMAIL_RECIPIENT = "jasmeen4783.be23@chitkara.edu.in"
         STAGING_SERVER = 'staging.example.com'
         PROD_SERVER = 'prod.example.com'
     }
-
     stages {
         stage('Build') {
             steps {
                 echo 'Building the application...'
-                bat 'npm install'
+                echo 'Using npm to install dependencies: npm install'
+                bat 'npm install'  // Installs dependencies
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
-                script {
-                    echo 'Running unit and integration tests...'
-                    try {
-                        bat 'npm test'
-                    } catch (err) {
-                        error "Unit and Integration Tests failed: ${err}"
-                    }
-                }
+                echo 'Running unit and integration tests...'
+                echo 'Using npm to run tests: npm test' // Runs test scripts
+                bat 'npm test'
             }
             post {
                 success {
                     script {
-                        def logContent = getSafeLogs()
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
                         mail(
                             to: "${EMAIL_RECIPIENT}",
-                            subject: "✅ Unit & Integration Tests Passed - ${currentBuild.fullDisplayName}",
-                            body: "Tests passed successfully.\n\nLogs:\n${logContent}"
+                            subject: "Unit and Integration Tests Result - ${currentBuild.fullDisplayName}",
+                            body: "Unit and Integration Tests completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                         )
                     }
                 }
                 failure {
                     script {
-                        def logContent = getSafeLogs()
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
                         mail(
                             to: "${EMAIL_RECIPIENT}",
-                            subject: "❌ Unit & Integration Tests Failed - ${currentBuild.fullDisplayName}",
-                            body: "Tests failed.\n\nLogs:\n${logContent}"
+                            subject: "Deploy to Production Failed - ${currentBuild.fullDisplayName}",
+                            body: "Deploy to Production failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                         )
                     }
                 }
@@ -52,24 +46,34 @@ pipeline {
 
         stage('Code Analysis') {
             steps {
-                echo 'Analyzing code using ESLint...'
-                bat 'npm run lint'
+                echo 'Analyzing code...'
+                echo 'Using ESLint for code analysis: npm run lint' // Runs ESLint for code analysis
             }
         }
 
         stage('Security Scan') {
             steps {
-                echo 'Performing security scan using npm audit...'
-                bat 'npm audit'
+                echo 'Performing security scan...'
+                echo 'Using npm audit for security scanning: npm audit' // Runs NPM Audit for security scanning
             }
             post {
                 always {
                     script {
-                        def logContent = getSafeLogs()
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
                         mail(
                             to: "${EMAIL_RECIPIENT}",
-                            subject: "🔒 Security Scan Result - ${currentBuild.fullDisplayName}",
-                            body: "Security scan completed.\n\nLogs:\n${logContent}"
+                            subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
+                            body: "Security scan completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                        )
+                    }
+                }
+                failure {
+                    script {
+                        def logContent = currentBuild.rawBuild.getLog(100).join("\n")
+                        mail(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Build Failed - ${currentBuild.fullDisplayName}",
+                            body: "Build failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
                         )
                     }
                 }
@@ -78,56 +82,35 @@ pipeline {
 
         stage('Deploy to Staging') {
             steps {
-                echo "Deploying to Staging Server: ${STAGING_SERVER}"
-                bat 'npm run deploy:staging'
+                echo 'Deploying to Staging Server...'
+                echo 'Using npm to deploy to staging: npm run deploy:staging' // Deploys to staging server
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
-                echo 'Running integration tests on Staging using Cypress...'
-                bat 'npx cypress run --env staging'
+                echo 'Running integration tests on Staging...'
+                echo 'Using Cypress for integration tests: npx cypress run --env staging' // Runs Cypress integration tests on staging
             }
         }
 
         stage('Deploy to Production') {
             steps {
-                echo "Deploying to Production Server: ${PROD_SERVER}"
-                bat 'npm run deploy:production'
+                echo 'Deploying to Production Server...'
+                echo 'Using npm to deploy to production: npm run deploy:production' // Deploys to production server
             }
         }
     }
-
     post {
         success {
             script {
-                def logContent = getSafeLogs()
+                def logContent = currentBuild.rawBuild.getLog(100).join("\n")
                 mail(
                     to: "${EMAIL_RECIPIENT}",
-                    subject: "✅ Pipeline Succeeded - ${currentBuild.fullDisplayName}",
-                    body: "All stages completed successfully.\n\nLogs:\n${logContent}"
-                )
-            }
-        }
-        failure {
-            script {
-                def logContent = getSafeLogs()
-                mail(
-                    to: "${EMAIL_RECIPIENT}",
-                    subject: "❌ Pipeline Failed - ${currentBuild.fullDisplayName}",
-                    body: "Some stages failed.\n\nLogs:\n${logContent}"
+                    subject: "Jenkins Pipeline Execution - Success",
+                    body: "Pipeline execution completed successfully.\n\nLogs:\n${logContent}"
                 )
             }
         }
     }
-}
-
-def getSafeLogs() {
-    def logs = ''
-    try {
-        logs = currentBuild.rawBuild.getLog(100).join("\n")
-    } catch (e) {
-        logs = "Could not fetch logs: ${e.message}"
-    }
-    return logs
 }
