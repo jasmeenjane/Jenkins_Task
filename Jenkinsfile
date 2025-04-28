@@ -1,10 +1,14 @@
 pipeline {
     agent any
 
+    environment {
+        DEFAULT_RECIPIENT = 'harjot4780.be23@chitkara.edu.in'
+    }
+
     stages {
         stage('Build') {
             steps {
-                echo "Stage 1: Building the code using Maven or Grad le"
+                echo "Stage 1: Building the code using Maven or Gradle"
             }
         }
 
@@ -15,7 +19,7 @@ pipeline {
             post {
                 success {
                     emailext(
-                        to: "harjot4780.be23@chitkara.edu.in",
+                        to: "${env.DEFAULT_RECIPIENT}",
                         subject: "Unit and Integration Test Stage: Success",
                         body: "Unit and Integration Test Stage was successful.",
                         attachLog: true
@@ -23,7 +27,7 @@ pipeline {
                 }
                 failure {
                     emailext(
-                        to: "harjot4780.be23@chitkara.edu.in",
+                        to: "${env.DEFAULT_RECIPIENT}",
                         subject: "Unit and Integration Test Stage: Failure",
                         body: "Unit and Integration Test Stage failed.",
                         attachLog: true
@@ -45,7 +49,7 @@ pipeline {
             post {
                 success {
                     emailext(
-                        to: "harjot4780.be23@chitkara.edu.in",
+                        to: "${env.DEFAULT_RECIPIENT}",
                         subject: "Security Scan Stage: Success",
                         body: "The security scan stage was successful.",
                         attachLog: true
@@ -53,7 +57,7 @@ pipeline {
                 }
                 failure {
                     emailext(
-                        to: "harjot4780.be23@chitkara.edu.in",
+                        to: "${env.DEFAULT_RECIPIENT}",
                         subject: "Security Scan Stage: Failure",
                         body: "The security scan stage failed.",
                         attachLog: true
@@ -75,7 +79,7 @@ pipeline {
             post {
                 success {
                     emailext(
-                        to: "harjot4780.be23@chitkara.edu.in",
+                        to: "${env.DEFAULT_RECIPIENT}",
                         subject: "Integration Tests on Staging Stage: Success",
                         body: "Integration Tests on Staging stage was successful.",
                         attachLog: true
@@ -83,7 +87,7 @@ pipeline {
                 }
                 failure {
                     emailext(
-                        to: "harjot4780.be23@chitkara.edu.in",
+                        to: "${env.DEFAULT_RECIPIENT}",
                         subject: "Integration Tests on Staging Stage: Failure",
                         body: "Integration Tests on Staging Stage failed.",
                         attachLog: true
