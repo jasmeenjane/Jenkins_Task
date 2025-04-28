@@ -3,6 +3,10 @@ pipeline {
 
     environment {
         DEFAULT_RECIPIENT = 'harjot4780.be23@chitkara.edu.in'
+        SMTP_HOST = 'smtp.gmail.com'
+        SMTP_PORT = '465'
+        SMTP_USER = 'jasmeen4783.be23@chitkara.edu.in'
+        SMTP_PASSWORD = 'oeto xhzy suam vaed'
     }
 
     stages {
@@ -19,18 +23,20 @@ pipeline {
             post {
                 success {
                     emailext(
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        subject: "Unit and Integration Test Stage: Success",
+                        subject: "✅ Unit and Integration Tests Passed",
                         body: "Unit and Integration Test Stage was successful.",
-                        attachLog: true
+                        to: "${env.DEFAULT_RECIPIENT}",
+                        attachLog: true,
+                        mimeType: 'text/plain'
                     )
                 }
                 failure {
                     emailext(
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        subject: "Unit and Integration Test Stage: Failure",
+                        subject: "❌ Unit and Integration Tests Failed",
                         body: "Unit and Integration Test Stage failed.",
-                        attachLog: true
+                        to: "${env.DEFAULT_RECIPIENT}",
+                        attachLog: true,
+                        mimeType: 'text/plain'
                     )
                 }
             }
@@ -49,17 +55,17 @@ pipeline {
             post {
                 success {
                     emailext(
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        subject: "Security Scan Stage: Success",
+                        subject: "✅ Security Scan Passed",
                         body: "The security scan stage was successful.",
+                        to: "${env.DEFAULT_RECIPIENT}",
                         attachLog: true
                     )
                 }
                 failure {
                     emailext(
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        subject: "Security Scan Stage: Failure",
+                        subject: "❌ Security Scan Failed",
                         body: "The security scan stage failed.",
+                        to: "${env.DEFAULT_RECIPIENT}",
                         attachLog: true
                     )
                 }
@@ -79,17 +85,17 @@ pipeline {
             post {
                 success {
                     emailext(
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        subject: "Integration Tests on Staging Stage: Success",
+                        subject: "✅ Integration Tests on Staging Passed",
                         body: "Integration Tests on Staging stage was successful.",
+                        to: "${env.DEFAULT_RECIPIENT}",
                         attachLog: true
                     )
                 }
                 failure {
                     emailext(
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        subject: "Integration Tests on Staging Stage: Failure",
+                        subject: "❌ Integration Tests on Staging Failed",
                         body: "Integration Tests on Staging Stage failed.",
+                        to: "${env.DEFAULT_RECIPIENT}",
                         attachLog: true
                     )
                 }
@@ -99,6 +105,14 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 echo "Stage 7: Deploying to Production Environment, e.g., using AWS"
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                echo "Pipeline execution completed. Email notifications sent with SSL (port 465)."
             }
         }
     }
