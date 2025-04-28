@@ -1,119 +1,142 @@
 pipeline {
     agent any
-
     environment {
-        DEFAULT_RECIPIENT = 'harjot4780.be23@chitkara.edu.in'
-        SMTP_HOST = 'smtp.gmail.com'
-        SMTP_PORT = '465'
-        SMTP_USER = 'jasmeen4783.be23@chitkara.edu.in'
-        SMTP_PASSWORD = 'oeto xhzy suam vaed'
+        EMAIL_RECIPIENT = "jasmeen4783.be23@chitkara.edu.in"
+        STAGING_SERVER = 'staging.example.com'
+        PROD_SERVER = 'prod.example.com'
     }
-
     stages {
         stage('Build') {
             steps {
-                echo "Stage 1: Building the code using Maven or Gradle"
+                echo 'Building the application...'
+                echo 'Using npm to install dependencies: npm install'
+                echo 'npm install'  // Installs dependencies
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
-                echo "Stage 2: Running Unit and Integration Tests using JUnit, Jacoco"
+                echo 'Running unit and integration tests...'
+                echo 'Using npm to run tests: npm test' // Runs test scripts
+                echo 'npm test'
             }
             post {
                 success {
-                    emailext(
-                        subject: "✅ Unit and Integration Tests Passed",
-                        body: "Unit and Integration Test Stage was successful.",
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        attachLog: true,
-                        mimeType: 'text/plain'
-                    )
+                    script {
+                        def logContent = getLogContent()
+                        mail(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Unit and Integration Tests Result - ${currentBuild.fullDisplayName}",
+                            body: "Unit and Integration Tests completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                        )
+                    }
                 }
                 failure {
-                    emailext(
-                        subject: "❌ Unit and Integration Tests Failed",
-                        body: "Unit and Integration Test Stage failed.",
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        attachLog: true,
-                        mimeType: 'text/plain'
-                    )
+                    script {
+                        def logContent = getLogContent()
+                        mail(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Unit Tests Failed - ${currentBuild.fullDisplayName}",
+                            body: "Unit and Integration Tests failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                        )
+                    }
                 }
             }
         }
 
         stage('Code Analysis') {
             steps {
-                echo "Stage 3: Performing Code Analysis using SonarQube or Checkstyle"
+                echo 'Analyzing code...'
+                echo 'Using ESLint for code analysis: npm run lint' // Runs ESLint for code analysis
             }
         }
 
         stage('Security Scan') {
             steps {
-                echo "Stage 4: Performing Security Scan using OWASP Dependency-Check"
+                echo 'Performing security scan...'
+                echo 'Using npm audit for security scanning: npm audit' // Runs NPM Audit for security scanning
             }
             post {
-                success {
-                    emailext(
-                        subject: "✅ Security Scan Passed",
-                        body: "The security scan stage was successful.",
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        attachLog: true
-                    )
-                }
-                failure {
-                    emailext(
-                        subject: "❌ Security Scan Failed",
-                        body: "The security scan stage failed.",
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        attachLog: true
-                    )
+                always {
+                    script {
+                        def logContent = getLogContent()
+                        mail(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Security Scan Result - ${currentBuild.fullDisplayName}",
+                            body: "Security scan completed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                        )
+                    }
                 }
             }
         }
 
         stage('Deploy to Staging') {
             steps {
-                echo "Stage 5: Deploying to Staging Environment (e.g., using AWS CodeDeploy)"
+                echo 'Deploying to Staging Server...'
+                echo 'Using npm to deploy to staging: npm run deploy:staging' // Deploys to staging server
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
-                echo "Running Integration Tests on Staging (e.g., using Selenium or Postman)"
-            }
-            post {
-                success {
-                    emailext(
-                        subject: "✅ Integration Tests on Staging Passed",
-                        body: "Integration Tests on Staging stage was successful.",
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        attachLog: true
-                    )
-                }
-                failure {
-                    emailext(
-                        subject: "❌ Integration Tests on Staging Failed",
-                        body: "Integration Tests on Staging Stage failed.",
-                        to: "${env.DEFAULT_RECIPIENT}",
-                        attachLog: true
-                    )
-                }
+                echo 'Running integration tests on Staging...'
+                echo 'Using Cypress for integration tests: npx cypress run --env staging' // Runs Cypress integration tests on staging
             }
         }
 
         stage('Deploy to Production') {
             steps {
-                echo "Stage 7: Deploying to Production Environment, e.g., using AWS"
+                echo 'Deploying to Production Server...'
+                echo 'Using npm to deploy to production: npm run deploy:production' // Deploys to production server
+            }
+            post {
+                failure {
+                    script {
+                        def logContent = getLogContent()
+                        mail(
+                            to: "${EMAIL_RECIPIENT}",
+                            subject: "Deploy to Production Failed - ${currentBuild.fullDisplayName}",
+                            body: "Deploy to Production failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                        )
+                    }
+                }
             }
         }
     }
-
     post {
-        always {
+        success {
             script {
-                echo "Pipeline execution completed. Email notifications sent with SSL (port 465)."
+                def logContent = getLogContent()
+                mail(
+                    to: "${EMAIL_RECIPIENT}",
+                    subject: "Jenkins Pipeline Execution - Success",
+                    body: "Pipeline execution completed successfully.\n\nLogs:\n${logContent}"
+                )
             }
+        }
+        failure {
+            script {
+                def logContent = getLogContent()
+                mail(
+                    to: "${EMAIL_RECIPIENT}",
+                    subject: "Jenkins Pipeline Failed - ${currentBuild.fullDisplayName}",
+                    body: "Pipeline execution failed: ${currentBuild.currentResult}\n\nLogs:\n${logContent}"
+                )
+            }
+        }
+    }
+}
+
+
+def getLogContent() {
+    try {
+        return currentBuild.getLog()
+    } catch (Exception e) {
+        try {
+            return currentBuild.rawBuild.getLog(100).join("\n")
+        } catch (Exception e2) {
+            
+            return "Unable to retrieve full logs. Build result: ${currentBuild.currentResult}"
         }
     }
 }
